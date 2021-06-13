@@ -1,18 +1,32 @@
 const formEl = document.querySelector('form');
+const nameField = document.querySelector('#name');
 const email = document.querySelector('#email');
+const jobRole = document.querySelector('#title');
+const otherJobRole = document.querySelector('#other-job-role');
+const designSelect = document.querySelector('#design');
+const colorSelect = document.querySelector('#color');
+const colorOptions = colorSelect.children;
+const activities = document.querySelector('#activities');
+const allActivities = document.querySelectorAll('#activities input');
+const activitiesBox = document.querySelector('#activities-box');
+const total = document.querySelector('#activities-cost');
+const cardNumber = document.querySelector('#cc-num');
 const zipCode = document.querySelector('#zip');
 const cvv = document.querySelector('#cvv');
-const cardNumber = document.querySelector('#cc-num');
+const payment = document.querySelector('#payment');
+const paypal = document.querySelector('#paypal');
+const bitcoin = document.querySelector('#bitcoin');
+const creditCard = document.querySelector('#credit-card');
+
+
 
 // 'Name' field is being focused at the page load
-const nameField = document.querySelector('#name');
 nameField.focus();
 
 // Hide 'Other Job Role' field by default
-const otherJobRole = document.querySelector('#other-job-role');
 otherJobRole.style.visibility = 'hidden';
 
-const jobRole = document.querySelector('#title');
+// 'Job Role' section should listen for user changes and shows 'Other Role' input if option 'Other' is checked
 jobRole.addEventListener('change', e =>{
    if (e.target.value === 'other') {
     otherJobRole.style.visibility = 'visible';
@@ -22,12 +36,9 @@ jobRole.addEventListener('change', e =>{
 })
 
 // Disable 'Color' select element
-const colorSelect = document.querySelector('#color');
-const colorOptions = colorSelect.children;
 colorSelect.disabled = true;
 
 // Design element should listen for user changes and show only t-shirt colors available for choosed design
-const designSelect = document.querySelector('#design');
 designSelect.addEventListener('change', e => {
     colorSelect.disabled = false;
     for (let i = 1; i < colorOptions.length; i++) {
@@ -45,17 +56,15 @@ designSelect.addEventListener('change', e => {
     }
 })
 
-// The Total $ el below the Register for Activities section should update to reflect the sum of the cost of the user's selected activities
-const total = document.querySelector('#activities-cost');
-const activities = document.querySelector('#activities');
-const allActivities = document.querySelectorAll('#activities input');
-let totalCost = 0;
 
+// The Total $ el below the Register for Activities section should update to reflect the sum of the cost of the user's selected activities and prevent user from registration of activities if they are happening at the same time
+let totalCost = 0;
+    // 'Register for Activities' should listen for user changes
     activities.addEventListener('change', e => {
-      const clicked = e.target;   
+      const clicked = e.target;
       const clickedType = clicked.getAttribute('data-day-and-time');
       const activityCost = +clicked.getAttribute('data-cost');
-     
+
       for(let i = 1; i < allActivities.length; i++) {
         const activityType = allActivities[i].getAttribute('data-day-and-time');
 
@@ -64,27 +73,22 @@ let totalCost = 0;
             allActivities[i].disabled = false;
         }
       }
-
         if (clicked.checked) { 
             totalCost += activityCost;
         } else if (!clicked.checked) {
             totalCost -= activityCost;
-        } 
+        }
       total.innerHTML = `Total: $${totalCost}`;
     })
 
 
 
-// The credit card payment option should be selected for the user by default. When the form first loads, 'Credit Card' should be displayed in the 'I'm going to pay with' <select> el
-const payment = document.querySelector('#payment');
-const paypal = document.querySelector('#paypal');
-const bitcoin = document.querySelector('#bitcoin');
-const creditCard = document.querySelector('#credit-card');
-
+// The credit card payment option should be selected for the user by default. When the form first loads, 'Credit Card' should be displayed in the 'I'm going to pay with'
+payment.children[1].selected = true;
 paypal.style.display = 'none';
 bitcoin.style.display = 'none';
-payment.children[1].selected = true;
 
+// 'I'm going to pay' section should listen for user changes and shows chosen payment method to the user
     payment.addEventListener('change', e => {
         const paymentMethod = e.target.value;
         if (paymentMethod === 'paypal') {
@@ -96,26 +100,50 @@ payment.children[1].selected = true;
         }
     })
 
+    // Hide other payment options
     function hidePaymentMethods (show, hideMethod1, hideMethod2) {
         show.style.display = '';
         hideMethod1.style.display = 'none';
-        hideMethod2.style.display = 'none';     
+        hideMethod2.style.display = 'none';
     }
 
-
+// Form element shoul listen for submit and prevent form from sending if there'se a problem in validation
 formEl.addEventListener('submit', e => {
     if (!nameValidator()) {
         e.preventDefault();
-    } else if (!emailValidator()) {
+        validationMessage(nameField, 'valid', 'not-valid', 'block');
+    } else {
+        validationMessage(nameField, 'not-valid', 'valid');
+    }
+    if (!emailValidator()) {
         e.preventDefault();
-    } else if (!activitiesValidator()) {
+        validationMessage(email, 'valid', 'not-valid', 'block');
+    }  else {
+        validationMessage(email, 'not-valid', 'valid');
+    }
+    if (!activitiesValidator()) {
         e.preventDefault();
-    } else if (!validCardNumber()) {
+        validationMessage(activitiesBox, 'valid', 'not-valid', 'block');
+    } else {
+        validationMessage(activitiesBox, 'not-valid', 'valid');
+    }
+    if (!validCardNumber()) {
         e.preventDefault();
-    } else if (!validZip()) {
+        validationMessage(cardNumber, 'valid', 'not-valid', 'block');
+    } else {
+        validationMessage(cardNumber, 'not-valid', 'valid');
+    }
+    if (!validZip()) {
         e.preventDefault();
-    } else if (!validCvv()) {
+        validationMessage(zipCode, 'valid', 'not-valid', 'block');
+    } else {
+        validationMessage(zipCode, 'not-valid', 'valid');
+    }
+    if (!validCvv()) {
         e.preventDefault();
+        validationMessage(cvv, 'valid', 'not-valid', 'block');
+    } else {
+        validationMessage(cvv, 'not-valid', 'valid');
     }
 })
 
@@ -155,25 +183,25 @@ const validCvv = () => {
     return validCvv;
 }
 
-activities.addEventListener('focus', () => {
-    for (let i = 1; i < allActivities.length; i ++) {
-        console.log(allActivities[i]);
-    }
-})
+const validationMessage = (id, removeClass, addClass, display = '') => {
+    const parentElement = id.parentElement;
+    parentElement.classList.remove(removeClass);
+    parentElement.classList.add(addClass);
+    parentElement.lastElementChild.style.display = display;
+}
 
-// Make the focus states of the activities more obvious to all users. 
-    // Make all of the activity checkbox input elements to listen for the focus and blur events.
 
-        // When the focus event is detected, add the .focus className to the checkbox input's parent label element.
-        // When the blur event is detected, remove the .focus className from the label element. It can be helpful here to directly target the element with the className of .focus in order to remove it.
+// Accessibility - Make all of the activity checkbox input elements to listen for the focus and blur events.
+function focusBlur (){
 
-// Make form validation errors obvious to all users.
-    // When the user tries to submit the form, if a rewuired form field or section is invalid:
-        // Add the .not-valid className to the parent element of the form field or section. For the activity section, the parent element would be the fieldset element for the activity section. For the others required inputs, the parent element would be a label element for the input.
-        // Remove the .valid className from the parent element of the form field or section.
-        // Display the .hint element associated with the form field or section, which will be the last child of the parent element of the form field or section. The parentElement and lastElementChild properties will be helpful here.
+  for (let i = 0; i < allActivities.length; i++) {
 
-    // If a required form field or section is valid:
-        // Add the .valid className to the parent element of the form field or section.
-        // Remove the .not-valid className from the parent element of the form field or section.
-        // Hide the .hint element associated with that element.
+    allActivities[i].addEventListener('focus', () => {
+    const checkboxLabel = allActivities[i].parentElement.classList.add('focus');
+    });
+    allActivities[i].addEventListener('blur', () =>{
+    const checkboxLabel = allActivities[i].parentElement.classList.remove('focus');
+    })
+ } 
+}
+focusBlur();
