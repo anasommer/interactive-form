@@ -5,7 +5,6 @@ const jobRole = document.querySelector('#title');
 const otherJobRole = document.querySelector('#other-job-role');
 const designSelect = document.querySelector('#design');
 const colorSelect = document.querySelector('#color');
-const colorOptions = colorSelect.children;
 const activities = document.querySelector('#activities');
 const allActivities = document.querySelectorAll('#activities input');
 const activitiesBox = document.querySelector('#activities-box');
@@ -40,18 +39,20 @@ colorSelect.disabled = true;
 
 // Design element should listen for user changes and show only t-shirt colors available for choosed design
 designSelect.addEventListener('change', e => {
+    const theme = e.target.value;
     colorSelect.disabled = false;
-    for (let i = 1; i < colorOptions.length; i++) {
-        const theme = e.target.value;
-        const colorOption = colorOptions[i].getAttribute('data-theme');
+    const colorChildren = colorSelect.children;
+
+    for (let i = 1; i < colorChildren.length; i++) {
+        const colorOption = colorChildren[i].getAttribute('data-theme');
 
         if (theme === colorOption) {
-            colorOptions[i].hidden = false;
-            colorOptions[i].setAttribute('selected', true);
+            colorChildren[i].hidden = false;
+            colorChildren[i].setAttribute('selected', true);
         }
-        else if (theme !== colorOptions) {
-            colorOptions[i].hidden = true;
-            colorOptions[i].setAttribute('selected', false);
+        else if (theme !== colorOption) {
+            colorChildren[i].hidden = true;
+            colorChildren[i].removeAttribute('selected', false);
         }
     }
 })
@@ -127,24 +128,26 @@ formEl.addEventListener('submit', e => {
     } else {
         validationMessage(activitiesBox, 'not-valid', 'valid');
     }
-    if (!validCardNumber()) {
-        e.preventDefault();
-        validationMessage(cardNumber, 'valid', 'not-valid', 'block');
-    } else {
-        validationMessage(cardNumber, 'not-valid', 'valid');
-    }
-    if (!validZip()) {
-        e.preventDefault();
-        validationMessage(zipCode, 'valid', 'not-valid', 'block');
-    } else {
-        validationMessage(zipCode, 'not-valid', 'valid');
-    }
-    if (!validCvv()) {
-        e.preventDefault();
-        validationMessage(cvv, 'valid', 'not-valid', 'block');
-    } else {
-        validationMessage(cvv, 'not-valid', 'valid');
-    }
+    if (payment.value === 'credit-card') {
+        if (!validCardNumber()) {
+            e.preventDefault();
+            validationMessage(cardNumber, 'valid', 'not-valid', 'block');
+        } else {
+            validationMessage(cardNumber, 'not-valid', 'valid');
+        }
+        if (!validZip()) {
+            e.preventDefault();
+            validationMessage(zipCode, 'valid', 'not-valid', 'block');
+        } else {
+            validationMessage(zipCode, 'not-valid', 'valid');
+        }
+        if (!validCvv()) {
+            e.preventDefault();
+            validationMessage(cvv, 'valid', 'not-valid', 'block');
+        } else {
+            validationMessage(cvv, 'not-valid', 'valid');
+        }
+}
 })
 
 // Form Validators
